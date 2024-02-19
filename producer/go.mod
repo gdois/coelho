@@ -1,3 +1,3 @@
-module rabbitmq/client
+module coelho/producer
 
-go 1.22.0
+go 1.20

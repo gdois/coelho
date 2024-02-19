@@ -11,15 +11,21 @@ const (
 	ServerPort    = "8080"
 )
 
-var messages = [3]string{"teste", "teste1", "teste3"}
+var messages [100]string
+
+func generateMessages() {
+	for i := 0; i < len(messages); i++ {
+		messages[i] = fmt.Sprintf("teste%d", i+1)
+	}
+}
 
 func producer() {
 	conn, err := net.Dial("tcp", ServerAddress+":"+ServerPort)
-
 	if err != nil {
 		fmt.Println("Connection failed")
 		return
 	}
+	defer conn.Close()
 
 	for _, message := range messages {
 		jsonMessage, err := json.Marshal(message)
@@ -28,16 +34,19 @@ func producer() {
 			continue
 		}
 
-		fmt.Printf("Sent message: %s\n", jsonMessage)
+		jsonMessage = append(jsonMessage, '\n')
+
+		_, err = conn.Write(jsonMessage)
 		if err != nil {
 			fmt.Println("Error sending message:", err)
 			continue
 		}
-	}
 
-	defer conn.Close()
+		fmt.Printf("Sent message: %s\n", jsonMessage)
+	}
 }
 
 func main() {
+	generateMessages()
 	producer()
 }
